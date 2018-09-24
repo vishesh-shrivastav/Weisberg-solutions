@@ -1,2 +1,2 @@
 # Weisberg-solutions
-Solutions for Weisberg book problems
+Solutions for Weisberg book problems.
