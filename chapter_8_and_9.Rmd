@@ -1,5 +1,5 @@
 ---
-title: "Homework 8"
+title: "Problems_from_ch8_and_ch9"
 output: rmarkdown::github_document
 ---
 
