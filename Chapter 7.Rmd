@@ -1,0 +1,94 @@
+---
+title: "Homework7"
+output: pdf_document
+---
+
+## Problem 6.3
+```{r}
+library(alr4)
+mod1 <- lm(lifeExpF ~ group, data = UN11)
+mod2 <- update(mod1, ~. + log(ppgdp))
+
+anova(mod1, mod2)
+```
+
+We get the F-test for NH: model 6.7 vs AH: model 6.9. Since the p-value is very small, we conclude that we should reject the NH model.
+
+## Problem 6.4
+
+### Problem 6.4.1
+The NH model includes log(ppgdp) as the regressor along with the interaction term for the interaction between group and log(ppgdp).
+
+### Problem 6.4.2
+```{r}
+mod4 <- lm(lifeExpF ~ group + log(ppgdp) + group:log(ppgdp), data = UN11)
+mod3 <- update(mod4, ~. - group)
+
+anova(mod3, mod4)
+```
+
+Fail to reject NH from p-value.
+
+## Problem 6.6
+
+## Problem 6.7
+
+### Problem 6.7.1
+```{r}
+# Transformations
+fuel2001$Fuel <- with(fuel2001, 1000*FuelC/Pop)
+fuel2001$Dlic <- with(fuel2001, 1000*Drivers/Pop)
+fuel2001$Income <- with(fuel2001, Income/1000)
+
+m1 <- lm(FuelC ~ Tax + Dlic + Income + log(Miles), data = fuel2001)
+m2 <- lm(FuelC ~ log(Miles) + Income + Dlic + Tax, data = fuel2001)
+
+anova(m1)
+anova(m2)
+```
+
+### Problem 6.7.2
+```{r}
+Anova(m1)
+Anova(m2)
+```
+
+## Problem 6.9
+```{r}
+w1 <- lm(Y ~ X1 + I(X1^2) + X2 + I(X2^2) + X1:X2, data = cakes)
+w2 <- update(w1, ~. - X1:X2)
+w3 <- update(w1, ~. - I(X1^2))
+w4 <- update(w1, ~. - X1 - I(X1^2) - X1:X2)
+
+anova(w2,w1)
+anova(w3,w1)
+anova(w4,w1)
+```
+
+In all three cases, p-values are smaller than 0.01. Hence, we can say that we reject the null hypothesis in all three cases.
+
+## Problem 7.2
+
+### Problem 7.8.1
+```{r}
+plot(Weight ~ Age, data = jevons)
+```
+
+
+```{r}
+plot(SD ~ Age, data = jevons)
+```
+
+We can see that linearity holds but variability is not constant. Older coins seem more variable.
+
+### Problem 7.8.2
+```{r}
+mm <- lm(Weight ~ Age, data = jevons, weights = n/SD^2)
+summary(mm)
+```
+
+### Problem 7.8.3
+```{r}
+predict(mm, data.frame(Age=0), interval = "confidence")
+```
+
