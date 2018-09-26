@@ -1,5 +1,5 @@
 ---
-title: "Chapter 5"
+title: "Problems from chapter_5"
 output:
   pdf_document: default
   html_document: default
