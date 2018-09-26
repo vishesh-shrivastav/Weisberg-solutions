@@ -1,0 +1,87 @@
+---
+title: "Homework6"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Problem 5.4
+
+### Problem 5.4.1
+```{r message=FALSE}
+library(alr4)
+Boxplot(log(acrePrice) ~ year, data = MinnLand, main="Variation of land price with year", id.n=1)
+```
+We can see from the boxplot that the sales prices showed an increasing trend from 2002-2008. After that, the prices remained more or less the same. This is not strictly in accordance with the general trend in United States housing sales price for these years, but it more or less follows the trend.
+
+### Problem 5.4.2
+```{r}
+year_as_factor <- factor(MinnLand$year)
+summary(year_as_factor)
+class(year_as_factor)
+model <- lm(log(acrePrice) ~ year_as_factor, data = MinnLand)
+summary(model)
+```
+
+We can see that the t-value for 2003 is negative while for all other years it is positive. This there are high chances that the regression coefficient for 2003 as a factor is zero. We confirm this in 5.4.3, when we fit the model without intercept, we observe that the coefficient for 2003 is almost the same as the intercept in 5.4.2. 
+
+### Problem 5.4.3
+```{r}
+# Fitting the model without the intercept
+model1 <- lm(log(acrePrice) ~ year_as_factor-1, data = MinnLand)
+summary(model1)
+
+# Print the means of log(acrePrice) for each year
+for (i in levels(year_as_factor)) {
+  print(paste("The mean of log(acrePrice) for the year ", as.numeric(i), 
+              "is: ", round(mean(log(subset(MinnLand, year==as.numeric(i))$acrePrice)),5)))
+}
+```
+
+We find that the parameter estimates without the intercepts are equal to the means of log(acrePrice) for each year.
+
+```{r}
+for (y in levels(year_as_factor)){
+  std_dev <- sd(log(subset(MinnLand, year==as.numeric(y))$acrePrice))
+  num_rows <- nrow(subset(MinnLand, year==as.numeric(y)))
+  std_err <- std_dev/sqrt(num_rows)
+  print(paste("Standard errors obtained by formula for the year ", 
+              as.numeric(i), "is: ", round(std_err,5)))
+}
+```
+
+We find that the standard errors of the regression coefficients are not the same as the standard errors obtained by formula. The reason for this difference can be attributed to the fact that the denominator in our calculated standard error is the number of data points in that particular year, whereas for the standard error that comes from the fitted model, the denominator in the standard error comes from pooling of all levels of the factor.
+
+## Problem 5.10
+
+### Problem 5.10.1
+The second model includes the interaction between year and region. It shows us that combined effect of year and region is more than the sum of their individual effects.
+
+### Problem 5.10.2
+```{r}
+# Fitting the model in 5.10.1 (b)
+model2 <- lm(log(acrePrice) ~ year * region, data = MinnLand)
+summary(model2)
+
+# Plotting the Effects for year vs region interaction
+plot(Effect(c("year","region"), model2, default.levels=100), 
+     rug=FALSE, grid=TRUE, multiline=TRUE)
+```
+
+We can see from the graph that the prices have been increasing for all the regions year on year consistently. Northwest has had the lowest price throughout and West Central has had the second lowest price throughout the years. South East had the highest price till 2006, after which it was South Central which overtook it. The prices for SouthWest took a big jump from 2006 to 2009, and became the second most costly in 2011. 
+
+## Problem 5.11
+
+### Problem 5.11.1
+```{r}
+model3 <- update(model2, ~ . + financing)
+summary(model3)
+confint(model3)["financingseller_financed" ,]
+```
+
+We can say that seller financed sales are lower than other types of sales, and these sales are lower than between 11% and 7%
+
+### Problem 5.11.2
+1. We cannot support this observation as this implies causation, which is not the case here. We can see that correlation exists, but we cannot conclude it to be  equal to causation.
+
+2. This statement, although consistent with the data, cannot be the only possible outcome.
