@@ -1,0 +1,147 @@
+---
+title: "Homework5"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+## Problem 4.2
+The summary for the four different models are found out in the following way and shown below
+
+```{r message=FALSE,include=TRUE}
+library(alr4)
+a<-(Transact$t1+Transact$t2)/2
+d<-Transact$t1-Transact$t2
+model1<-lm(Transact$time~Transact$t1+Transact$t2)
+model2<-lm(Transact$time~a+d)
+model3<-lm(Transact$time~Transact$t2+d)
+model4<-lm(Transact$time~Transact$t1+Transact$t2+a+d)
+```
+```{r message=TRUE}
+#The summary of the M1 model is
+summary(model1)
+
+#The summary of the M2 model is
+summary(model2)
+
+#The summary of the M3 model is
+summary(model3)
+
+#The summary of the M4 model is
+summary(model4)
+```
+
+### 4.2.1
+
+For model4, 'a' and 'd' can be seen as linear combinations of t1 and t2, thus leading to overparameterization of the model. The effects of t1 and t2 are already accounted for in the model. The variables 'a' and 'd' do not contribute anything to the estimation. Hence their coefficient estimates are labelled as 'NA'.
+
+### 4.2.2
+
+For all the 4 models, we have the same estimate of intercept, R-square, Residual standard error, F-statistic. The difference among the models are the coefficients of the variables used. If the variables a and d are used, then we get the same coefficients for model1 and model4. Estimates of t2 in model1 and model3 and estimates of d in model2 and model3 are different.
+
+### 4.2.3
+
+We get the coefficient of t2 as 2.034 in model1 and as 7.496 in model3. This is due to the addition of the variable d, which is effectively the difference of d1 and d2. We can see that we get the same value if we substitute d as t1-t2. Hence the difference is due to the variable d. 
+
+## Problem 4.6
+
+Our fitted model is:
+```{r}
+model <- lm(log(fertility)~ pctUrban, data=UN11)
+summary(model)
+```
+
+Leading to the equation:
+$log(fertility)=1.501-0.01pctUrban$
+
+The value of 1.501 tells us that if a country has 0% of its population living in urban areas, the estimated value of fertility for that country will be $e^(1.501)$ = 4.49. The cofficient of pctUrban tells us that if the proportion of the population living in urban areas of a country increases by 1, it leads to a decrease in fertility by $e^(0.01)$ = 1.01 .
+
+## Problem 4.7
+
+Our fitted model is:
+```{r}
+model <- lm(log(fertility)~ log(ppgdp)+lifeExpF, data=UN11)
+summary(model)
+```
+
+We get a estimated equation as: 
+$log(fertility)=3.507-0.065*log(ppgdp) -0.028*lifeExpF$.
+
+We take the mean value of ppgdp as a sample = 13012 or in terms of log(ppgdp) 9.4736. On increasing the sample value by 25%, we get the new value as 16265, the log(ppgdp) for which is 9.6968. 
+
+We take the mean value of lifeExpF as a sample =  72.29. Upon putting the initial values of the variables into the equation we get log(fertility) value as 0.8671 which in terms of fertility is 2.38004. 
+
+We recalculate the values with the increased log(ppgdp) value i.e 9.6968, we get the value of log(fertility) as 0.8525288 which corresponds to the value of fertility as 2.345571. The difference between the two values is 0.034469, which is a decrease of 1.4%. Hence, we can conclude that a 25% increase in ppgdp decreases the value of fertility by 1.4%.
+
+## Problem 4.8
+
+## Problem 4.9
+```{r}
+mod <- lm(salary ~ sex, data=salary)
+summary(mod)
+mod2<-lm(salary ~ sex + year, data=salary)
+summary(mod2)
+```
+
+We get our equation as 
+$E(Salary|Sex)=24697-3340*Sex$ 
+
+#### Q4.9.1 
+
+Estimated average salary for a male faculty member is $24697 as the value of sex for a male is 0 whereas the estimated average salary for a female faculty member is $24697-$3340 = $21357.
+
+#### Q4.9.2
+
+The equation derived for the model including Sex and Years is $E(Salary|Sex,Years)=18065+201*Sex+759*Years$. 
+The true mean function in terms of Sex has a negative coefficient for the variable Sex. When we add 'Years' into the model, we see that the coefficient of Sex becomes positive. This maybe because Years might be a better predictor og salary. On comparing the two models, we can also see that the coefficient of sex being zero cannot be discarded which explains the huge change in the coefficient in the two models. We can thus conclude that the variable 'Sex' is not a good predictor for salary.
+
+## Problem 7.9
+
+### 7.9.1
+```{r message=FALSE}
+library(alr4)
+t <- t.test(log(UN11$fertility))
+ci <- t$conf.int
+mean_ci <- exp(ci)
+ci
+mean_ci
+```
+
+We see that the 95% confidence interval for the mean of log(fertility) is (0.85, 0.97) and the 95% confidence interval for the mean of fertility is (2.34, 2.65).
+
+### 7.9.2
+
+```{r message=FALSE}
+library(boot)
+
+# Function to obtain median from the data
+median_func <- function(data, indices){
+  median(data[indices])
+}
+# Bootstrapping with 999 replications
+results <- boot(data = UN11$fertility, statistic = median_func, R = 999)
+# Get 95% confidence level
+res <- boot.ci(results, type = c("norm","perc","bca"))
+print(res)
+# Length of CIs
+# Norm - 0.31, perc - 0.288, bca - 0.312
+```
+
+We see that the predicted confidence interval using bootstrap is narrower than the one obtained by linear model. We can conclude that Bootstrap is therefore a good method for assuming normal distribution.
+
+## Problem 7.10
+
+### 7.10.1
+```{r}
+model_new <- lm(FuelC ~ Tax+Drivers+Income+log(Miles), data = fuel2001)
+boot1 <- Boot(model_new, R=999)
+confint(boot1, type="bca")
+# Compare with normal
+confint(model_new)
+```
+
+### 7.10.2
+
+```{r}
+hist(boot1)
+```
