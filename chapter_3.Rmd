@@ -1,0 +1,88 @@
+---
+title: "Problems from chapter_5"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 3.2
+
+### 3.2.1
+```{r message=FALSE}
+library(alr4)
+pairs(~fertility + log(ppgdp) + pctUrban, data = UN11)
+```
+
+log(ppgdp) shows good positive correlation and linearity with pctUrban, both as a regressor and as a response. 'fertility' and log(ppgdp) show good negative correlation and linearity, both as regressor and response pairs. When 'fertility' is regressor and pctUrban is response, the graph does not show good linearity or correlation. When fertility is response and pctUrban is predictor, it shows negative correlation and linearity.
+
+### 3.2.2
+```{r}
+# Regression with log(ppgdp)
+fit1 <- lm(fertility ~ log(ppgdp), data = UN11)
+summary(fit1)
+```
+
+
+```{r}
+# Regression with pctUrban
+fit2 <- lm(fertility ~ pctUrban, data = UN11)
+summary(fit2)
+```
+
+Slope coefficients for both cases are -0.62009 and -0.031045. We can see that the p-values for both of them are <2e-16. Upon examining the significance codes in the output, we see that they are insignificant (***) than any conventional level of significance.
+
+### 3.2.3
+Getting the added value plot
+```{r}
+ff <- lm(log(ppgdp) ~ pctUrban, data = UN11)
+
+# Regression of residuals
+fit3 <- lm(residuals(fit2) ~ residuals(ff))
+
+#Av Plot
+av.plots(lm(fertility ~ pctUrban + log(ppgdp), data = UN11))
+
+```
+Since we get a null plot for pctUrban, we can conclude that log(ppgdp) is not useful after adding pctUrban. On the other hand, we can see that pctUrban is useful after adding log(ppgdp) as we get a negative slope.
+
+```{r}
+# Regression with both predictors
+f5 <- lm(fertility ~ pctUrban + log(ppgdp), data = UN11)
+summary(f5)
+```
+We see that our slope is -0.6151425, which we can verify to be true from our added-variable plot.
+
+### 3.2.4
+ 
+```{r}
+summary(fit3)
+summary(f5)
+```
+
+We see that the coefficient of log(ppgdp) is identical in both the regressions,
+equal to -0.6151425.
+
+### 3.2.5
+```{r}
+plot(residuals(fit3), residuals(f5))
+```
+From the plot it is clear that the residuals for added-value plot are identical to the residuals for the mean function with both predictors.
+
+### 3.2.6
+The added-value plot computation has one extra degree of freedom. Hence, the t-test coefficient for log(ppgdp) is not the same for added-variable plot and regression plot with both regressors. This happens because in a plot with multiple regressors, the number of degrees of freedom is (N - the number of regressors). Since we had taken two regressors, the degrees of freedom became N-2, which is 1 less than N-1 for the added-variable plot.
+
+## Problem 3.4
+
+### 3.4.1
+Since x2 is a linear function of x1, the residuals from the regression of x2 after x1 will be all zero. The graph will look like a vertical line. If x1 and x2 are highly correlated, the variablity on the x-axis of the added-variable plot will be very close to zero and very small compared to the variablity of the original variable.
+
+### 3.4.2
+Since y = 3x1, the residuals of the regression of y on x1 will be all zero, hence the plot will be a horizontal line. If y and x1 are unccorelated, the variabilty on the y-axis will be very close to zero and we will get an approximate null plot.
+
+### 3.4.3
+The added-variable plot for x2 after x1 will have the same shape as the marginal plot for y versus x2 if x1 is uncorrelated with both x2 and y.
+
+### 3.4.4
+True. This is because the vertical variable is the residuals from the regression of y on x1, which is never larger than the vertical variation of y versus x2.
