@@ -1,0 +1,135 @@
+---
+title: "Problems_from_ch9"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 9.1
+
+### Problem 9.1.1
+```{r message=FALSE, warning=FALSE}
+library(alr4)
+```
+```{r}
+summary(Rpdata)
+pairs(~. -y, Rpdata)
+```
+There is nothing strange.
+
+### Problem 9.1.2
+```{r}
+# Fit the model
+m1<-lm(y~.,Rpdata)
+summary(m1)
+```
+There is nothing strange.
+
+### Problem 9.1.3
+```{r}
+residualPlot(lm(y ~ ., data = Rpdata))
+```
+
+## Problem 9.11
+```{r}
+# Apply transformations and fit the model
+fuel2001<-transform(fuel2001, Dlic = 1000 * Drivers/Pop,
+                    Fuel = 1000 * FuelC/Pop,
+                    Income = Income/1000)
+
+m1 <- lm(Fuel~Tax+Dlic+Income+log(Miles), fuel2001)
+# Create indexes
+rows <- c("AK", "NY", "HI", "WY", "DC")
+# No. of observations
+n<-nrow(fuel2001)
+
+# Get summary table
+summ <- data.frame(cook = cooks.distance(m1)[rows],
+                   Fuel = fuel2001[rows,"Fuel"],
+                   residu = resid(m1)[rows],
+                   h = hatvalues(m1)[rows])
+# calculate standardized residual
+summ$r <- summ$residu / (64.891*sqrt(1-summ$h))
+# calculatet statistics for outlier test
+summ$t <- summ$r*((n-5-1)/(n-5-summ$r^2))^(1/2)
+# calculate Bonferroni corrected p???value
+summ$p <- 5*2*pt(-abs(summ$t),46)
+# Use 5 because we have to report for these 5 cases
+summ
+```
+
+None of them would be declared outliers. 
+Alaska has the largest influence on regression.
+
+## Problem 9.15
+
+### Problem 9.15.1
+```{r}
+m1 <- lm(Life ~ poly(Speed, 2) + poly(Feed, 2) + Speed:Feed, lathe1)
+boxCox(m1)
+```
+This is the graph of the profile log-likelihood for the transformation parameter using the Box-Cox method for the second-order lathe model. The confidence interval for lambda???? is very narrow and includes zero, suggesting a log transformation.
+
+### Problem 9.15.2
+```{r}
+m2 <- update(m1, log(Life) ~ .)
+influenceIndexPlot(m2)
+```
+Observation 9-12 have large leverages by design in this planned experiment. These were "star points", unreplicated observations at relatively extreme values of the predictors to model curvature. Two of these, 9 and 10, also have large residuals and these in combination give large values for Cook's Distance as well.
+```{r}
+scatterplot(Speed ~ Feed, lathe1, id.method=9:12, smooth=FALSE, reg.line=FALSE,
+boxplots=FALSE, cex=2, pch=20)
+```
+With all the data, the analysis of variance table is
+```{r}
+Anova(m2)
+```
+With the two cases deleted, the interaction is no longer important.
+```{r}
+m3 <- update(m2, subset=-c(9, 10))
+Anova(m3)
+```
+In this example deleting the points is probably not called for; after all, this were designed to be influential cases, so there is a hint of an interaction here.
+
+## Problem 9.16
+Plot Buchanan vs Bush and label 'Palm Beach'. It can be seen that Palm Beach has an unusually high number of Buchanan votes. 
+```{r}
+aa <- florida[c("PALM BEACH"),]
+with(florida, plot(Buchanan ~ Bush))
+text(aa[,2:3], labels = row.names(aa), pos = 1)
+```
+Conduct an outlier test for the mean function E(Bucahanan | Bush)
+```{r}
+outlierTest(lm(Buchanan ~ Bush, florida), cutoff = 67, n.max = 67)
+```
+The outlier test suggests that Palm Beach is indeed an outlier.
+
+From the plot we also see another country that has an unusual number of votes. The point on the right has an unusually high number of Bush votes.
+
+To find the point:
+```{r}
+rownames(florida[florida$Bush > 250000,])
+```
+
+We see that the point is DADE county. We plot our data again, labeling our points.
+```{r}
+aa <- florida[c("PALM BEACH","DADE"),]
+with(florida, plot(Buchanan ~ Bush))
+text(aa[,2:3], labels = row.names(aa), pos = 1)
+```
+
+Transforming our data to log scale and performing Outlier Test:
+```{r}
+plot(log(florida$Buchanan) ~ log(florida$Bush), xlab="Log(Bush)", ylab="Log(Buchanan)")
+```
+
+```{r}
+m <- lm(log(Buchanan)~log(Bush),florida)
+outlierTest(m, cutoff=67,n.max=67)
+```
+
+From this table we can see that the value of DADE county does not appear to be an outlier on the logarithmic scale.
