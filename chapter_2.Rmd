@@ -1,0 +1,153 @@
+---
+title: "Problems from chapter_2"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 2.4
+
+### 2.4.1
+Plotting y=bigmac2009 versus x=bigmac2003 with the ols fitted line and 
+the y=x line.
+```{r message=FALSE}
+library(alr4)
+plot(bigmac2009 ~ bigmac2003, data = UBSprices, col="lightblue", pch=19, cex=0.9, font=2)
+text(bigmac2009 ~ bigmac2003, data = UBSprices, cex=0.9, font=2)
+reg <- lm(bigmac2009 ~ bigmac2003, data = UBSprices)
+abline(reg, col="red")
+abline(0,1)
+
+```
+Unusual cases:
+For most of the data points, the price of big mac in 2003 was more than the price in 2009. However, for points that are lying above the y=x line, the price in 2009 is greater than the price in 2003. Hence, the cases like points 45, 20, 11, 8, 31, 12, 21 etc are the unusual cases. 
+
+### 2.4.2
+We can see from the plot the data is neither showing linearity nor is it correlated. Also, the variance is varying a lot as we move across the x-axis.
+
+### 2.4.3
+Plotting log(bigmac2009) versus log(bigmac2003).
+```{r}
+plot(bigmac2009 ~ bigmac2003, log = "xy", data = UBSprices)
+```
+We can see that the data here is showing strong linearity alog with a strong correlation between x and y. As we move across the x-axis, the values of y are also increasing. The variance across x-axis also remains the same more or less, specially in the central portion of the data. Hence, is graph can be more sensibly summarized with a linear regression.
+
+## Problem 2.5
+```{r message=FALSE}
+reg <- lm(Late ~ Early, data = ftcollinssnow)
+summary(reg)
+```
+We can verify that the t-value fot the slope is 1.553.
+
+## Problem 2.15
+
+### 2.15.1
+```{r message=FALSE}
+library(alr4)
+fit <- lm(Length ~ Age, data = wblake)
+# 95% confidence intervals for mean length at ages 2, 4 and 6
+p246 <- predict(fit, data.frame(Age=c(2,4,6)), interval = "confidence")
+p246
+```
+
+### 2.15.2
+```{r}
+# 95% confidence intervals for mean length at age 9
+p9 <- predict(fit, data.frame(Age=9), interval = "confidence")
+p9
+```
+This interval is likely to be untrustworthy as the data does not have any fish with age greater than 8. So, age = 9 is an extrapolation of the data and we are ensure if our mean function is valid for age = 9 or not.
+
+## Problem 2.16
+
+### 2.16.1
+```{r}
+logfertility <- log(UN11$fertility)
+logppgdp <- log(UN11$ppgdp)
+reg <- lm(logfertility ~ logppgdp)
+summary(reg)
+```
+
+### 2.16.2
+```{r}
+plot(logfertility ~ logppgdp, data = UN11)
+abline(reg, col = "red")
+```
+
+### 2.16.3
+The t-test can be used, with t = -14.79 with 197 degrees of freedom. Th p-value can be seen to be extremely small, so the one-sided p-value will also be close to zero. Thus, we have strong evidence that Beta1 < 0, suggesting that mostly countries with higher log(ppgdp) have lower log(fertility).
+
+### 2.16.4
+From the summary of the data we can see that the value of R-squared is 0.526, which is the coefficient of determination. It means that 52.6% of the variablity in log(Fertility) can be explained by conditioning log(ppgdp). 
+
+### 2.16.5
+```{r}
+# 95% prediction interval for data with ppgdp = 1000 
+p1000 <- predict(reg, data.frame(logppgdp=log(1000)), interval = "prediction")
+p1000
+
+# The point prediction is 1.234567
+
+# Finding prediction interval for fertility by taking 
+#exponential values of lower and upper bounds of p1000:
+exp(0.6258791)
+exp(1.843256)
+```
+
+### 2.16.6
+
+```{r}
+#Locality with highest value of fertility
+rownames(UN11)[which.max(UN11$fertility)]
+
+#Locality with lowest value of fertility
+rownames(UN11)[which.min(UN11$fertility)]
+
+#Two localities with largest positive residuals
+xx <- sort(reg$residuals, decreasing = TRUE)
+xx[1:2] # Gives indices 58 and 4
+rownames(UN11)[58]
+rownames(UN11)[4]
+
+#Two localities with largest negative residuals
+xy <- sort(reg$residuals)
+xy[1:2] # Gives indices 23 and 118
+rownames(UN11)[23]
+rownames(UN11)[118]
+```
+
+## Problem 2.20
+
+### 2.20.1
+
+```{r}
+reg1 <- lm(Interval ~ Duration, data = oldfaith)
+summary(reg1)
+
+```
+Equation for predicting Interval from Duration:
+Interval = 33.987808 + 0.176863(Duration)
+
+### 2.20.2
+```{r}
+# 95% confidence intervals for duration 250 seconds
+p250 <- predict(reg1, data.frame(Duration=250), interval = "prediction")
+p250
+```
+We are 95% confident that the individual will have to wait between 66.35 and 90.05 seconds for the next eruption.
+
+### 2.20.3
+```{r}
+p <- predict(reg1, data.frame(Duration=250))
+p
+# We find the mean to be 78.20354
+# We find the standard deviation to be 6.004 from the summary. 
+#Since we assume constant variance, we assume that the standard deviation is same throughout.
+
+qnorm(0.9, mean = 78.20354, sd = 6.004)
+```
+Hence, 85.89798 is the 0.90 quantile.
+
+
